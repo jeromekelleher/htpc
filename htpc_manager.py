@@ -7,7 +7,6 @@ import configparser
 import datetime
 import io
 import json
-import os.path
 import subprocess
 import syslog
 
@@ -26,7 +25,8 @@ class HtpcManager(object):
         self._wakeup_time_buffer = datetime.timedelta(minutes=10)
         # If there is more than this number of minutes until the next
         # recording we should shutdown.
-        self._idle_shutdown_buffer = datetime.timedelta(minutes=5)
+        self._idle_shutdown_buffer = datetime.timedelta(minutes=15)
+        assert self._idle_shutdown_buffer > self._wakeup_time_buffer
         self._set_tvheadend_status()
         self._set_kodi_status()
         self.log("HTPC Manager initialised")
@@ -91,7 +91,7 @@ class HtpcManager(object):
 
 
 def read_credentials():
-    filename = os.path.expanduser("~/.htpc_manager")
+    filename = "/home/jk/.htpc_manager"
     config = configparser.ConfigParser()
     with open(filename) as config_file:
         config.read_file(config_file)
