@@ -26,6 +26,8 @@ class HtpcManager(object):
         # If there is more than this number of minutes until the next
         # recording we should shutdown.
         self._idle_shutdown_buffer = datetime.timedelta(minutes=15)
+        # We won't shutdown until at least 30 minutes after booting.
+        self._startup_shutdown_buffer = 30
         assert self._idle_shutdown_buffer > self._wakeup_time_buffer
         self._set_tvheadend_status()
         self._set_kodi_status()
@@ -49,13 +51,23 @@ class HtpcManager(object):
             start_times.append(start)
         self._next_recording_start = min(start_times)
 
+    def _get_uptime(self):
+        """
+        Returns the system uptime in minutes.
+        """
+        with open("/proc/uptime", "r") as f:
+            uptime_seconds = float(f.readline().split()[0])
+        return uptime_seconds / 60
+
     def shutdown_required(self):
         """
         Returns True if the system should shutdown.
         """
+        uptime = self._get_uptime()
         now = datetime.datetime.now()
         return (
             (not self._kodi_running) and
+            uptime > self._startup_shutdown_buffer and
             self._next_recording_start > now + self._idle_shutdown_buffer)
 
     def set_wakeup_timer(self):
