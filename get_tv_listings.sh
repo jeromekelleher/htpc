@@ -7,5 +7,6 @@
 # as it causes problems with tvheadend (DOCTYPE).
 
 # Get one days worth of listings for 1 days in the future
-sudo -u hts -H sh -c \
-    'tv_grab_uk_atlas --days=1 --offset=1 | sed -e 2d | socat - UNIX-CONNECT:/home/hts/.hts/tvheadend/epggrab/xmltv.sock'
+tv_grab_uk_atlas --debug --days=1 --offset=1 2> /home/hts/atlas.log \
+    | sed -e 2d \
+    | socat - UNIX-CONNECT:/home/hts/.hts/tvheadend/epggrab/xmltv.sock 
